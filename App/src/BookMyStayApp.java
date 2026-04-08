@@ -1,69 +1,108 @@
-import java.util.*;
 /**
  * ============================================================
- * CLASS - ReservationValidator
+ * Use Case 3: Centralized Room Inventory Management
+ * Single File Implementation
  * ============================================================
- * Use Case 9: Error Handling & Validation
- * Description:
- * This class is responsible for validating
- * booking requests before they are processed.
- * All validation rules are centralized
- * to avoid duplication and inconsistency.
- * @version 9.0
  */
-class InvalidBookingException extends Exception {
-    public InvalidBookingException(String message) {
-        super(message);
+import java.util.HashMap;
+import java.util.Map;
+abstract class Room {
+    protected int numberOfBeds;
+    protected int squareFeet;
+    protected double pricePerNight;
+    public Room(int numberOfBeds, int squareFeet, double pricePerNight) {
+        this.numberOfBeds = numberOfBeds;
+        this.squareFeet = squareFeet;
+        this.pricePerNight = pricePerNight;
+
+    }
+    public void displayRoomDetails() {
+        System.out.println("Beds: " + numberOfBeds);
+        System.out.println("Size: " + squareFeet + " sqft");
+        System.out.println("Price per night: " + pricePerNight);
+    }
+}
+class SingleRoom extends Room {
+    public SingleRoom() {
+        super(1, 250, 1500.0);
+    }
+}
+
+class DoubleRoom extends Room {
+    public DoubleRoom() {
+        super(2, 400, 2500.0);
+    }
+}
+class SuiteRoom extends Room {
+    public SuiteRoom() {
+        super(3, 750, 5000.0);
     }
 }
 class RoomInventory {
-    private List<String> availableRooms;
-
+    private Map<String, Integer> roomAvailability;
     public RoomInventory() {
-        availableRooms = Arrays.asList("Single", "Double", "Suite");
+        roomAvailability = new HashMap<>();
+        initializeInventory();
     }
-    public boolean isValidRoom(String roomType) {
-        return availableRooms.contains(roomType);
+    private void initializeInventory() {
+        roomAvailability.put("Single", 5);
+        roomAvailability.put("Double", 3);
+        roomAvailability.put("Suite", 2);
     }
-}
-class BookingRequestQueue {
-    public void addRequest(String guestName, String roomType) {
-        System.out.println("Booking request added for " + guestName);
+    public Map<String, Integer> getRoomAvailability() {
+        return roomAvailability;
     }
-}
-class ReservationValidator {
-
-    public void validate(String guestName, String roomType, RoomInventory inventory)
-            throws InvalidBookingException {
-        if (guestName == null || guestName.trim().isEmpty()) {
-            throw new InvalidBookingException("Guest name cannot be empty.");
-        }
-        if (!inventory.isValidRoom(roomType)) {
-            throw new InvalidBookingException("Invalid room type selected.");
-        }
+    public void updateAvailability(String roomType, int count) {
+        roomAvailability.put(roomType, count);
     }
 }
 
+/**
+ * ============================================================
+ * MAIN CLASS - UseCase3InventorySetup
+ * ============================================================
+ * Use Case 3: Centralized Room Inventory Management
+ * Description:
+ * This class serves as the entry point for demonstrating
+ * centralized room inventory management in the hotel system.
+ * At this stage, the application:
+ * Creates different room type objects (Single, Double, Suite)
+ * Initializes a centralized RoomInventory instance
+ * Retrieves room availability from a single source (HashMap)
+ * Displays room details along with available room counts
+ * Room characteristics (beds, size, price) are obtained
+ * from Room objects, while availability is managed separately
+ * through the RoomInventory class.
+ * No booking, updating, or search functionality is included
+ * in this use case.
+ * The goal is to demonstrate separation of concerns and
+ * centralized data management.
+ * @version 3.1
+ */
 public class BookMyStayApp {
-    public static void main(String[] args) {
-        System.out.println("Booking Validation");
-        Scanner scanner = new Scanner(System.in);
-        RoomInventory inventory = new RoomInventory();
-        ReservationValidator validator = new ReservationValidator();
-        BookingRequestQueue bookingQueue = new BookingRequestQueue();
-        try {
-            System.out.print("Enter guest name: ");
-            String name = scanner.nextLine();
-            System.out.print("Enter room type (Single/Double/Suite): ");
-            String roomType = scanner.nextLine();
-            validator.validate(name, roomType, inventory);
-            bookingQueue.addRequest(name, roomType);
-            System.out.println("Booking successful!");
 
-        } catch (InvalidBookingException e) {
-            System.out.println("Booking failed: " + e.getMessage());
-        } finally {
-            scanner.close();
-        }
+    /**
+     * Application entry point.
+     * This method is executed when the program starts.
+     * @param args Command-line arguments
+     */
+    public static void main(String[] args) {
+        Room single = new SingleRoom();
+        Room doubleRoom = new DoubleRoom();
+        Room suite = new SuiteRoom();
+        RoomInventory inventory = new RoomInventory();
+        System.out.println("Hotel Room Inventory Status\n");
+        System.out.println("Single Room:");
+        single.displayRoomDetails();
+        System.out.println("Available Rooms: " +
+                inventory.getRoomAvailability().get("Single") + "\n");
+        System.out.println("Double Room:");
+        doubleRoom.displayRoomDetails();
+        System.out.println("Available Rooms: " +
+                inventory.getRoomAvailability().get("Double") + "\n");
+        System.out.println("Suite Room:");
+        suite.displayRoomDetails();
+        System.out.println("Available Rooms: " +
+                inventory.getRoomAvailability().get("Suite"));
     }
 }
